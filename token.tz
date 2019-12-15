@@ -1,0 +1,946 @@
+parameter (or (or (or (or (or (pair %approve (pair (int %amount) (address %fromAddr)) (address %toAddr)) (pair %burn (address %address) (int %amount))) (pair %mint (address %address) (int %amount))) (address %setAdministrator)) (bool %setPause)) (pair %transfer (pair (int %amount) (address %fromAddr)) (address %toAddr)));
+storage   (pair (pair (pair (address %administrator) (big_map %balances address (pair (map %approvals address int) (int %balance)))) (bool %paused)) (int %totalSupply));
+code
+  {
+    DUP;        # pair(params, storage).pair(params, storage)
+    CDR;        # storage.pair(params, storage)
+    SWAP;       # pair(params, storage).storage
+    CAR;        # params.storage
+    IF_LEFT
+      {
+        IF_LEFT
+          {
+            IF_LEFT
+              {
+                IF_LEFT
+                  {
+                    IF_LEFT
+                      {
+                        # Entry point: approve # params.storage
+                        # sp.verify((sp.sender == self.data.administrator) | ((~ self.data.paused) & (params.fromAddr == sp.sender))) # params.storage
+                        SWAP;       # storage.params
+                        DUP;        # storage.storage.params
+                        DUG 2;      # storage.params.storage
+                        CAAAR;      # address.params.storage
+                        SENDER;     # address.address.params.storage
+                        COMPARE;    # int.params.storage
+                        EQ;         # bool.params.storage
+                        IF
+                          {
+                            PUSH bool True; # bool.params.storage
+                          }
+                          {
+                            SWAP;       # storage.params
+                            DUP;        # storage.storage.params
+                            DUG 2;      # storage.params.storage
+                            CADR;       # bool.params.storage
+                            NOT;        # bool.params.storage
+                            IF
+                              {
+                                DUP;        # params.params.storage
+                                CADR;       # address.params.storage
+                                SENDER;     # address.address.params.storage
+                                COMPARE;    # int.params.storage
+                                EQ;         # bool.params.storage
+                              }
+                              {
+                                PUSH bool False; # bool.params.storage
+                              }; # bool.params.storage
+                          }; # bool.params.storage
+                        IF
+                          {}
+                          {
+                            PUSH string "WrongCondition: (sp.sender == self.data.administrator) | ((~ self.data.paused) & (params.fromAddr == sp.sender))"; # string.params.storage
+                            FAILWITH;   # FAILED
+                          }; # params.storage
+                        # sp.verify(self.data.balances[params.fromAddr].approvals.get(params.toAddr, 0) == 0) # params.storage
+                        PUSH int 0; # int.params.storage
+                        DIG 2;      # storage.int.params
+                        DUP;        # storage.storage.int.params
+                        DUG 3;      # storage.int.params.storage
+                        CAADR;      # big_map address (pair (map address int) int).int.params.storage
+                        DIG 2;      # params.big_map address (pair (map address int) int).int.storage
+                        DUP;        # params.params.big_map address (pair (map address int) int).int.storage
+                        DUG 3;      # params.big_map address (pair (map address int) int).int.params.storage
+                        CADR;       # address.big_map address (pair (map address int) int).int.params.storage
+                        GET;        # option (pair (map address int) int).int.params.storage
+                        IF_SOME
+                          {}
+                          {
+                            PUSH unit Unit; # unit.int.params.storage
+                            FAILWITH;   # FAILED
+                          }; # pair (map address int) int.int.params.storage
+                        CAR;        # map address int.int.params.storage
+                        DIG 2;      # params.map address int.int.storage
+                        DUP;        # params.params.map address int.int.storage
+                        DUG 3;      # params.map address int.int.params.storage
+                        CDR;        # address.map address int.int.params.storage
+                        GET;        # option int.int.params.storage
+                        IF_SOME
+                          {}
+                          {
+                            PUSH unit Unit; # unit.int.params.storage
+                            FAILWITH;   # FAILED
+                          }; # int.int.params.storage
+                        COMPARE;    # int.params.storage
+                        EQ;         # bool.params.storage
+                        IF
+                          {}
+                          {
+                            PUSH string "WrongCondition: self.data.balances[params.fromAddr].approvals.get(params.toAddr, 0) == 0"; # string.params.storage
+                            FAILWITH;   # FAILED
+                          }; # params.storage
+                        # self.data.balances[params.fromAddr].approvals[params.toAddr] = params.amount # params.storage
+                        SWAP;       # storage.params
+                        DUP;        # storage.storage.params
+                        DUG 2;      # storage.params.storage
+                        DUP;        # storage.storage.params.storage
+                        CAADR;      # big_map address (pair (map address int) int).storage.params.storage
+                        DUP;        # big_map address (pair (map address int) int).big_map address (pair (map address int) int).storage.params.storage
+                        DIG 3;      # params.big_map address (pair (map address int) int).big_map address (pair (map address int) int).storage.storage
+                        DUP;        # params.params.big_map address (pair (map address int) int).big_map address (pair (map address int) int).storage.storage
+                        DUG 4;      # params.big_map address (pair (map address int) int).big_map address (pair (map address int) int).storage.params.storage
+                        CADR;       # address.big_map address (pair (map address int) int).big_map address (pair (map address int) int).storage.params.storage
+                        DUP;        # address.address.big_map address (pair (map address int) int).big_map address (pair (map address int) int).storage.params.storage
+                        DUG 2;      # address.big_map address (pair (map address int) int).address.big_map address (pair (map address int) int).storage.params.storage
+                        GET;        # option (pair (map address int) int).address.big_map address (pair (map address int) int).storage.params.storage
+                        IF_SOME
+                          {}
+                          {
+                            PUSH unit Unit; # unit.address.big_map address (pair (map address int) int).storage.params.storage
+                            FAILWITH;   # FAILED
+                          }; # pair (map address int) int.address.big_map address (pair (map address int) int).storage.params.storage
+                        DUP;        # pair (map address int) int.pair (map address int) int.address.big_map address (pair (map address int) int).storage.params.storage
+                        CAR;        # map address int.pair (map address int) int.address.big_map address (pair (map address int) int).storage.params.storage
+                        DIG 5;      # params.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).storage.storage
+                        DUP;        # params.params.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).storage.storage
+                        DUG 6;      # params.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).storage.params.storage
+                        CAAR;       # int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).storage.params.storage
+                        SOME;       # option int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).storage.params.storage
+                        DIG 6;      # params.option int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).storage.storage
+                        DUP;        # params.params.option int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).storage.storage
+                        DUG 7;      # params.option int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).storage.params.storage
+                        CDR;        # address.option int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).storage.params.storage
+                        UPDATE;     # map address int.pair (map address int) int.address.big_map address (pair (map address int) int).storage.params.storage
+                        SWAP;       # pair (map address int) int.map address int.address.big_map address (pair (map address int) int).storage.params.storage
+                        CDR;        # int.map address int.address.big_map address (pair (map address int) int).storage.params.storage
+                        SWAP;       # map address int.int.address.big_map address (pair (map address int) int).storage.params.storage
+                        PAIR;       # pair (map address int) int.address.big_map address (pair (map address int) int).storage.params.storage
+                        SOME;       # option (pair (map address int) int).address.big_map address (pair (map address int) int).storage.params.storage
+                        SWAP;       # address.option (pair (map address int) int).big_map address (pair (map address int) int).storage.params.storage
+                        UPDATE;     # big_map address (pair (map address int) int).storage.params.storage
+                        SWAP;       # storage.big_map address (pair (map address int) int).params.storage
+                        DUP;        # storage.storage.big_map address (pair (map address int) int).params.storage
+                        DIP
+                          {
+                            CAR;        # pair (pair address (big_map address (pair (map address int) int))) bool.big_map address (pair (map address int) int).params.storage
+                            DUP;        # pair (pair address (big_map address (pair (map address int) int))) bool.pair (pair address (big_map address (pair (map address int) int))) bool.big_map address (pair (map address int) int).params.storage
+                            DIP
+                              {
+                                CAAR;       # address.big_map address (pair (map address int) int).params.storage
+                                PAIR;       # pair address (big_map address (pair (map address int) int)).params.storage
+                              }; # pair (pair address (big_map address (pair (map address int) int))) bool.pair address (big_map address (pair (map address int) int)).params.storage
+                            CDR;        # bool.pair address (big_map address (pair (map address int) int)).params.storage
+                            SWAP;       # pair address (big_map address (pair (map address int) int)).bool.params.storage
+                            PAIR;       # pair (pair address (big_map address (pair (map address int) int))) bool.params.storage
+                          }; # storage.pair (pair address (big_map address (pair (map address int) int))) bool.params.storage
+                        CDR;        # int.pair (pair address (big_map address (pair (map address int) int))) bool.params.storage
+                        SWAP;       # pair (pair address (big_map address (pair (map address int) int))) bool.int.params.storage
+                        PAIR;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.storage
+                        DUG 2;      # params.storage.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DROP;       # storage.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DROP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                      }
+                      {
+                        # Entry point: burn # params.storage
+                        # sp.verify(sp.sender == self.data.administrator) # params.storage
+                        SWAP;       # storage.params
+                        DUP;        # storage.storage.params
+                        DUG 2;      # storage.params.storage
+                        CAAAR;      # address.params.storage
+                        SENDER;     # address.address.params.storage
+                        COMPARE;    # int.params.storage
+                        EQ;         # bool.params.storage
+                        IF
+                          {}
+                          {
+                            PUSH string "WrongCondition: sp.sender == self.data.administrator"; # string.params.storage
+                            FAILWITH;   # FAILED
+                          }; # params.storage
+                        # sp.verify(self.data.balances[params.address].balance >= params.amount) # params.storage
+                        DUP;        # params.params.storage
+                        CDR;        # int.params.storage
+                        DIG 2;      # storage.int.params
+                        DUP;        # storage.storage.int.params
+                        DUG 3;      # storage.int.params.storage
+                        CAADR;      # big_map address (pair (map %approvals address int) (int %balance)).int.params.storage
+                        DIG 2;      # params.big_map address (pair (map %approvals address int) (int %balance)).int.storage
+                        DUP;        # params.params.big_map address (pair (map %approvals address int) (int %balance)).int.storage
+                        DUG 3;      # params.big_map address (pair (map %approvals address int) (int %balance)).int.params.storage
+                        CAR;        # address.big_map address (pair (map %approvals address int) (int %balance)).int.params.storage
+                        GET;        # option (pair (map %approvals address int) (int %balance)).int.params.storage
+                        IF_SOME
+                          {}
+                          {
+                            PUSH unit Unit; # unit.int.params.storage
+                            FAILWITH;   # FAILED
+                          }; # pair (map %approvals address int) (int %balance).int.params.storage
+                        CDR;        # int.int.params.storage
+                        COMPARE;    # int.params.storage
+                        GE;         # bool.params.storage
+                        IF
+                          {}
+                          {
+                            PUSH string "WrongCondition: self.data.balances[params.address].balance >= params.amount"; # string.params.storage
+                            FAILWITH;   # FAILED
+                          }; # params.storage
+                        # self.data.balances[params.address].balance -= params.amount # params.storage
+                        SWAP;       # storage.params
+                        DUP;        # storage.storage.params
+                        DUG 2;      # storage.params.storage
+                        DUP;        # storage.storage.params.storage
+                        CAADR;      # big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        DUP;        # big_map address (pair (map %approvals address int) (int %balance)).big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        DIG 3;      # params.big_map address (pair (map %approvals address int) (int %balance)).big_map address (pair (map %approvals address int) (int %balance)).storage.storage
+                        DUP;        # params.params.big_map address (pair (map %approvals address int) (int %balance)).big_map address (pair (map %approvals address int) (int %balance)).storage.storage
+                        DUG 4;      # params.big_map address (pair (map %approvals address int) (int %balance)).big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        CAR;        # address.big_map address (pair (map %approvals address int) (int %balance)).big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        DUP;        # address.address.big_map address (pair (map %approvals address int) (int %balance)).big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        DUG 2;      # address.big_map address (pair (map %approvals address int) (int %balance)).address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        GET;        # option (pair (map %approvals address int) (int %balance)).address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        IF_SOME
+                          {}
+                          {
+                            PUSH unit Unit; # unit.address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                            FAILWITH;   # FAILED
+                          }; # pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        DIG 4;      # params.pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).storage.storage
+                        DUP;        # params.params.pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).storage.storage
+                        DUG 5;      # params.pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        CDR;        # int.pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        DIG 4;      # storage.int.pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).params.storage
+                        DUP;        # storage.storage.int.pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).params.storage
+                        DUG 5;      # storage.int.pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        CAADR;      # big_map address (pair (map %approvals address int) (int %balance)).int.pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        DIG 6;      # params.big_map address (pair (map %approvals address int) (int %balance)).int.pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).storage.storage
+                        DUP;        # params.params.big_map address (pair (map %approvals address int) (int %balance)).int.pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).storage.storage
+                        DUG 7;      # params.big_map address (pair (map %approvals address int) (int %balance)).int.pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        CAR;        # address.big_map address (pair (map %approvals address int) (int %balance)).int.pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        GET;        # option (pair (map %approvals address int) (int %balance)).int.pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        IF_SOME
+                          {}
+                          {
+                            PUSH unit Unit; # unit.int.pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                            FAILWITH;   # FAILED
+                          }; # pair (map %approvals address int) (int %balance).int.pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        CDR;        # int.int.pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        SUB;        # int.pair (map %approvals address int) (int %balance).address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        SWAP;       # pair (map %approvals address int) (int %balance).int.address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        CAR;        # map address int.int.address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        PAIR;       # pair (map address int) int.address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        SOME;       # option (pair (map address int) int).address.big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        SWAP;       # address.option (pair (map address int) int).big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        UPDATE;     # big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                        SWAP;       # storage.big_map address (pair (map %approvals address int) (int %balance)).params.storage
+                        DUP;        # storage.storage.big_map address (pair (map %approvals address int) (int %balance)).params.storage
+                        DIP
+                          {
+                            CAR;        # pair (pair (address %administrator) (big_map %balances address (pair (map %approvals address int) (int %balance)))) (bool %paused).big_map address (pair (map %approvals address int) (int %balance)).params.storage
+                            DUP;        # pair (pair (address %administrator) (big_map %balances address (pair (map %approvals address int) (int %balance)))) (bool %paused).pair (pair (address %administrator) (big_map %balances address (pair (map %approvals address int) (int %balance)))) (bool %paused).big_map address (pair (map %approvals address int) (int %balance)).params.storage
+                            DIP
+                              {
+                                CAAR;       # address.big_map address (pair (map %approvals address int) (int %balance)).params.storage
+                                PAIR;       # pair address (big_map address (pair (map %approvals address int) (int %balance))).params.storage
+                              }; # pair (pair (address %administrator) (big_map %balances address (pair (map %approvals address int) (int %balance)))) (bool %paused).pair address (big_map address (pair (map %approvals address int) (int %balance))).params.storage
+                            CDR;        # bool.pair address (big_map address (pair (map %approvals address int) (int %balance))).params.storage
+                            SWAP;       # pair address (big_map address (pair (map %approvals address int) (int %balance))).bool.params.storage
+                            PAIR;       # pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool.params.storage
+                          }; # storage.pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool.params.storage
+                        CDR;        # int.pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool.params.storage
+                        SWAP;       # pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool.int.params.storage
+                        PAIR;       # pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.params.storage
+                        DUG 2;      # params.storage.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        SWAP;       # storage.params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        DROP;       # params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        # self.data.totalSupply -= params.amount # params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        SWAP;       # pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.params
+                        DUP;        # pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.params
+                        DUG 2;      # pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        SWAP;       # params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        DUP;        # params.params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        DUG 2;      # params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        CDR;        # int.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        SWAP;       # pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.int.params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        DUP;        # pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.int.params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        DUG 2;      # pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.int.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        CDR;        # int.int.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        SUB;        # int.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        SWAP;       # pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.int.params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        CAR;        # pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool.int.params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        PAIR;       # pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        DUG 2;      # params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        DROP;       # pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                        DROP;       # pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                      }; # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                  }
+                  {
+                    # Entry point: mint # params.storage
+                    # sp.verify(sp.sender == self.data.administrator) # params.storage
+                    SWAP;       # storage.params
+                    DUP;        # storage.storage.params
+                    DUG 2;      # storage.params.storage
+                    CAAAR;      # address.params.storage
+                    SENDER;     # address.address.params.storage
+                    COMPARE;    # int.params.storage
+                    EQ;         # bool.params.storage
+                    IF
+                      {}
+                      {
+                        PUSH string "WrongCondition: sp.sender == self.data.administrator"; # string.params.storage
+                        FAILWITH;   # FAILED
+                      }; # params.storage
+                    # sp.verify(sp.now <= sp.timestamp(1577412060)) # params.storage
+                    PUSH timestamp "1577412060"; # timestamp.params.storage
+                    NOW;        # timestamp.timestamp.params.storage
+                    COMPARE;    # int.params.storage
+                    LE;         # bool.params.storage
+                    IF
+                      {}
+                      {
+                        PUSH string "WrongCondition: sp.now <= sp.timestamp(1577412060)"; # string.params.storage
+                        FAILWITH;   # FAILED
+                      }; # params.storage
+                    # If sp.now <= sp.timestamp(1577412060)... # params.storage
+                    PUSH timestamp "1577412060"; # timestamp.params.storage
+                    NOW;        # timestamp.timestamp.params.storage
+                    COMPARE;    # int.params.storage
+                    LE;         # bool.params.storage
+                    IF
+                      {
+                        # If ~ (self.data.balances.contains(params.address))... # params.storage
+                        SWAP;       # storage.params
+                        DUP;        # storage.storage.params
+                        DUG 2;      # storage.params.storage
+                        CAADR;      # big_map address (pair (map %approvals address int) (int %balance)).params.storage
+                        SWAP;       # params.big_map address (pair (map %approvals address int) (int %balance)).storage
+                        DUP;        # params.params.big_map address (pair (map %approvals address int) (int %balance)).storage
+                        DUG 2;      # params.big_map address (pair (map %approvals address int) (int %balance)).params.storage
+                        CAR;        # address.big_map address (pair (map %approvals address int) (int %balance)).params.storage
+                        MEM;        # bool.params.storage
+                        NOT;        # bool.params.storage
+                        IF
+                          {
+                            # self.data.balances[params.address] = sp.record(approvals = {}, balance = 0) # params.storage
+                            SWAP;       # storage.params
+                            DUP;        # storage.storage.params
+                            DUG 2;      # storage.params.storage
+                            DUP;        # storage.storage.params.storage
+                            CAADR;      # big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                            PUSH (option (pair (map address int) int)) (Some (Pair {} 0)); # option (pair (map address int) int).big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                            DIG 3;      # params.option (pair (map address int) int).big_map address (pair (map %approvals address int) (int %balance)).storage.storage
+                            DUP;        # params.params.option (pair (map address int) int).big_map address (pair (map %approvals address int) (int %balance)).storage.storage
+                            DUG 4;      # params.option (pair (map address int) int).big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                            CAR;        # address.option (pair (map address int) int).big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                            UPDATE;     # big_map address (pair (map %approvals address int) (int %balance)).storage.params.storage
+                            SWAP;       # storage.big_map address (pair (map %approvals address int) (int %balance)).params.storage
+                            DUP;        # storage.storage.big_map address (pair (map %approvals address int) (int %balance)).params.storage
+                            DIP
+                              {
+                                CAR;        # pair (pair (address %administrator) (big_map %balances address (pair (map %approvals address int) (int %balance)))) (bool %paused).big_map address (pair (map %approvals address int) (int %balance)).params.storage
+                                DUP;        # pair (pair (address %administrator) (big_map %balances address (pair (map %approvals address int) (int %balance)))) (bool %paused).pair (pair (address %administrator) (big_map %balances address (pair (map %approvals address int) (int %balance)))) (bool %paused).big_map address (pair (map %approvals address int) (int %balance)).params.storage
+                                DIP
+                                  {
+                                    CAAR;       # address.big_map address (pair (map %approvals address int) (int %balance)).params.storage
+                                    PAIR;       # pair address (big_map address (pair (map %approvals address int) (int %balance))).params.storage
+                                  }; # pair (pair (address %administrator) (big_map %balances address (pair (map %approvals address int) (int %balance)))) (bool %paused).pair address (big_map address (pair (map %approvals address int) (int %balance))).params.storage
+                                CDR;        # bool.pair address (big_map address (pair (map %approvals address int) (int %balance))).params.storage
+                                SWAP;       # pair address (big_map address (pair (map %approvals address int) (int %balance))).bool.params.storage
+                                PAIR;       # pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool.params.storage
+                              }; # storage.pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool.params.storage
+                            CDR;        # int.pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool.params.storage
+                            SWAP;       # pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool.int.params.storage
+                            PAIR;       # pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int.params.storage
+                            DUG 2;      # params.storage.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                            SWAP;       # storage.params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                            DROP;       # params.pair (pair (pair address (big_map address (pair (map %approvals address int) (int %balance)))) bool) int
+                          }
+                          {}; # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        # self.data.balances[params.address].balance += params.amount # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        SWAP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params
+                        DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params
+                        DUG 2;      # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        CAADR;      # big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUP;        # big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DIG 3;      # params.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUP;        # params.params.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUG 4;      # params.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        CAR;        # address.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUP;        # address.address.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUG 2;      # address.big_map address (pair (map address int) int).address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        GET;        # option (pair (map address int) int).address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        IF_SOME
+                          {}
+                          {
+                            PUSH unit Unit; # unit.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                            FAILWITH;   # FAILED
+                          }; # pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DIG 4;      # params.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUP;        # params.params.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUG 5;      # params.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        CDR;        # int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DIG 4;      # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.pair (map address int) int.address.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.pair (map address int) int.address.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUG 5;      # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        CAADR;      # big_map address (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DIG 6;      # params.big_map address (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUP;        # params.params.big_map address (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUG 7;      # params.big_map address (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        CAR;        # address.big_map address (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        GET;        # option (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        IF_SOME
+                          {}
+                          {
+                            PUSH unit Unit; # unit.int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                            FAILWITH;   # FAILED
+                          }; # pair (map address int) int.int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        CDR;        # int.int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        ADD;        # int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        SWAP;       # pair (map address int) int.int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        CAR;        # map address int.int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        PAIR;       # pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        SOME;       # option (pair (map address int) int).address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        SWAP;       # address.option (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        UPDATE;     # big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        SWAP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DIP
+                          {
+                            CAR;        # pair (pair address (big_map address (pair (map address int) int))) bool.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                            DUP;        # pair (pair address (big_map address (pair (map address int) int))) bool.pair (pair address (big_map address (pair (map address int) int))) bool.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                            DIP
+                              {
+                                CAAR;       # address.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                                PAIR;       # pair address (big_map address (pair (map address int) int)).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                              }; # pair (pair address (big_map address (pair (map address int) int))) bool.pair address (big_map address (pair (map address int) int)).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                            CDR;        # bool.pair address (big_map address (pair (map address int) int)).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                            SWAP;       # pair address (big_map address (pair (map address int) int)).bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                            PAIR;       # pair (pair address (big_map address (pair (map address int) int))) bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                          }; # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair address (big_map address (pair (map address int) int))) bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        CDR;        # int.pair (pair address (big_map address (pair (map address int) int))) bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        SWAP;       # pair (pair address (big_map address (pair (map address int) int))) bool.int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        PAIR;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUG 2;      # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        SWAP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DROP;       # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        # self.data.totalSupply += params.amount # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        SWAP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params
+                        DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params
+                        DUG 2;      # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        SWAP;       # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUP;        # params.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUG 2;      # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        CDR;        # int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        SWAP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUG 2;      # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        CDR;        # int.int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        ADD;        # int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        SWAP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        CAR;        # pair (pair address (big_map address (pair (map address int) int))) bool.int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        PAIR;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DUG 2;      # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        SWAP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                        DROP;       # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                      }
+                      {}; # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                    DROP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                  }; # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+              }
+              {
+                # Entry point: setAdministrator # params.storage
+                # sp.verify(sp.sender == self.data.administrator) # params.storage
+                SWAP;       # storage.params
+                DUP;        # storage.storage.params
+                DUG 2;      # storage.params.storage
+                CAAAR;      # address.params.storage
+                SENDER;     # address.address.params.storage
+                COMPARE;    # int.params.storage
+                EQ;         # bool.params.storage
+                IF
+                  {}
+                  {
+                    PUSH string "WrongCondition: sp.sender == self.data.administrator"; # string.params.storage
+                    FAILWITH;   # FAILED
+                  }; # params.storage
+                # self.data.administrator = params # params.storage
+                SWAP;       # storage.params
+                DUP;        # storage.storage.params
+                DUG 2;      # storage.params.storage
+                SWAP;       # params.storage.storage
+                DUP;        # params.params.storage.storage
+                DUG 2;      # params.storage.params.storage
+                SWAP;       # storage.params.params.storage
+                DUP;        # storage.storage.params.params.storage
+                DIP
+                  {
+                    CAR;        # pair (pair (address %administrator) (big_map %balances address (pair (map %approvals address int) (int %balance)))) (bool %paused).params.params.storage
+                    DUP;        # pair (pair (address %administrator) (big_map %balances address (pair (map %approvals address int) (int %balance)))) (bool %paused).pair (pair (address %administrator) (big_map %balances address (pair (map %approvals address int) (int %balance)))) (bool %paused).params.params.storage
+                    DIP
+                      {
+                        CADR;       # big_map address (pair (map %approvals address int) (int %balance)).params.params.storage
+                        SWAP;       # params.big_map address (pair (map %approvals address int) (int %balance)).params.storage
+                        PAIR;       # pair(params, _).params.storage
+                      }; # pair (pair (address %administrator) (big_map %balances address (pair (map %approvals address int) (int %balance)))) (bool %paused).pair(params, _).params.storage
+                    CDR;        # bool.pair(params, _).params.storage
+                    SWAP;       # pair(params, _).bool.params.storage
+                    PAIR;       # pair(pair(params, _), _).params.storage
+                  }; # storage.pair(pair(params, _), _).params.storage
+                CDR;        # int.pair(pair(params, _), _).params.storage
+                SWAP;       # pair(pair(params, _), _).int.params.storage
+                PAIR;       # pair(pair(pair(params, _), _), _).params.storage
+                DUG 2;      # params.storage.pair(pair(pair(params, _), _), _)
+                DROP;       # storage.pair(pair(pair(params, _), _), _)
+                DROP;       # pair(pair(pair(params, _), _), _)
+              }; # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+          }
+          {
+            # Entry point: setPause # params.storage
+            # sp.verify(sp.sender == self.data.administrator) # params.storage
+            SWAP;       # storage.params
+            DUP;        # storage.storage.params
+            DUG 2;      # storage.params.storage
+            CAAAR;      # address.params.storage
+            SENDER;     # address.address.params.storage
+            COMPARE;    # int.params.storage
+            EQ;         # bool.params.storage
+            IF
+              {}
+              {
+                PUSH string "WrongCondition: sp.sender == self.data.administrator"; # string.params.storage
+                FAILWITH;   # FAILED
+              }; # params.storage
+            # self.data.paused = params # params.storage
+            SWAP;       # storage.params
+            DUP;        # storage.storage.params
+            DUG 2;      # storage.params.storage
+            SWAP;       # params.storage.storage
+            DUP;        # params.params.storage.storage
+            DUG 2;      # params.storage.params.storage
+            SWAP;       # storage.params.params.storage
+            DUP;        # storage.storage.params.params.storage
+            DIP
+              {
+                CAAR;       # pair (address %administrator) (big_map %balances address (pair (map %approvals address int) (int %balance))).params.params.storage
+                PAIR;       # pair(_, params).params.storage
+              }; # storage.pair(_, params).params.storage
+            CDR;        # int.pair(_, params).params.storage
+            SWAP;       # pair(_, params).int.params.storage
+            PAIR;       # pair(pair(_, params), _).params.storage
+            DUG 2;      # params.storage.pair(pair(_, params), _)
+            DROP;       # storage.pair(pair(_, params), _)
+            DROP;       # pair(pair(_, params), _)
+          }; # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+      }
+      {
+        # Entry point: transfer # params.storage
+        # sp.verify((sp.sender == self.data.administrator) | ((~ self.data.paused) & ((params.fromAddr == sp.sender) | (self.data.balances[params.fromAddr].approvals[params.toAddr] >= params.amount)))) # params.storage
+        SWAP;       # storage.params
+        DUP;        # storage.storage.params
+        DUG 2;      # storage.params.storage
+        CAAAR;      # address.params.storage
+        SENDER;     # address.address.params.storage
+        COMPARE;    # int.params.storage
+        EQ;         # bool.params.storage
+        IF
+          {
+            PUSH bool True; # bool.params.storage
+          }
+          {
+            SWAP;       # storage.params
+            DUP;        # storage.storage.params
+            DUG 2;      # storage.params.storage
+            CADR;       # bool.params.storage
+            NOT;        # bool.params.storage
+            IF
+              {
+                DUP;        # params.params.storage
+                CADR;       # address.params.storage
+                SENDER;     # address.address.params.storage
+                COMPARE;    # int.params.storage
+                EQ;         # bool.params.storage
+                IF
+                  {
+                    PUSH bool True; # bool.params.storage
+                  }
+                  {
+                    DUP;        # params.params.storage
+                    CAAR;       # int.params.storage
+                    DIG 2;      # storage.int.params
+                    DUP;        # storage.storage.int.params
+                    DUG 3;      # storage.int.params.storage
+                    CAADR;      # big_map address (pair (map %approvals address int) (int %balance)).int.params.storage
+                    DIG 2;      # params.big_map address (pair (map %approvals address int) (int %balance)).int.storage
+                    DUP;        # params.params.big_map address (pair (map %approvals address int) (int %balance)).int.storage
+                    DUG 3;      # params.big_map address (pair (map %approvals address int) (int %balance)).int.params.storage
+                    CADR;       # address.big_map address (pair (map %approvals address int) (int %balance)).int.params.storage
+                    GET;        # option (pair (map %approvals address int) (int %balance)).int.params.storage
+                    IF_SOME
+                      {}
+                      {
+                        PUSH unit Unit; # unit.int.params.storage
+                        FAILWITH;   # FAILED
+                      }; # pair (map %approvals address int) (int %balance).int.params.storage
+                    CAR;        # map address int.int.params.storage
+                    DIG 2;      # params.map address int.int.storage
+                    DUP;        # params.params.map address int.int.storage
+                    DUG 3;      # params.map address int.int.params.storage
+                    CDR;        # address.map address int.int.params.storage
+                    GET;        # option int.int.params.storage
+                    IF_SOME
+                      {}
+                      {
+                        PUSH unit Unit; # unit.int.params.storage
+                        FAILWITH;   # FAILED
+                      }; # int.int.params.storage
+                    COMPARE;    # int.params.storage
+                    GE;         # bool.params.storage
+                  }; # bool.params.storage
+              }
+              {
+                PUSH bool False; # bool.params.storage
+              }; # bool.params.storage
+          }; # bool.params.storage
+        IF
+          {}
+          {
+            PUSH string "WrongCondition: (sp.sender == self.data.administrator) | ((~ self.data.paused) & ((params.fromAddr == sp.sender) | (self.data.balances[params.fromAddr].approvals[params.toAddr] >= params.amount)))"; # string.params.storage
+            FAILWITH;   # FAILED
+          }; # params.storage
+        # If ~ (self.data.balances.contains(params.toAddr))... # params.storage
+        SWAP;       # storage.params
+        DUP;        # storage.storage.params
+        DUG 2;      # storage.params.storage
+        CAADR;      # big_map address (pair (map address int) int).params.storage
+        SWAP;       # params.big_map address (pair (map address int) int).storage
+        DUP;        # params.params.big_map address (pair (map address int) int).storage
+        DUG 2;      # params.big_map address (pair (map address int) int).params.storage
+        CDR;        # address.big_map address (pair (map address int) int).params.storage
+        MEM;        # bool.params.storage
+        NOT;        # bool.params.storage
+        IF
+          {
+            # self.data.balances[params.toAddr] = sp.record(approvals = {}, balance = 0) # params.storage
+            SWAP;       # storage.params
+            DUP;        # storage.storage.params
+            DUG 2;      # storage.params.storage
+            DUP;        # storage.storage.params.storage
+            CAADR;      # big_map address (pair (map address int) int).storage.params.storage
+            PUSH (option (pair (map address int) int)) (Some (Pair {} 0)); # option (pair (map address int) int).big_map address (pair (map address int) int).storage.params.storage
+            DIG 3;      # params.option (pair (map address int) int).big_map address (pair (map address int) int).storage.storage
+            DUP;        # params.params.option (pair (map address int) int).big_map address (pair (map address int) int).storage.storage
+            DUG 4;      # params.option (pair (map address int) int).big_map address (pair (map address int) int).storage.params.storage
+            CDR;        # address.option (pair (map address int) int).big_map address (pair (map address int) int).storage.params.storage
+            UPDATE;     # big_map address (pair (map address int) int).storage.params.storage
+            SWAP;       # storage.big_map address (pair (map address int) int).params.storage
+            DUP;        # storage.storage.big_map address (pair (map address int) int).params.storage
+            DIP
+              {
+                CAR;        # pair (pair address (big_map address (pair (map address int) int))) bool.big_map address (pair (map address int) int).params.storage
+                DUP;        # pair (pair address (big_map address (pair (map address int) int))) bool.pair (pair address (big_map address (pair (map address int) int))) bool.big_map address (pair (map address int) int).params.storage
+                DIP
+                  {
+                    CAAR;       # address.big_map address (pair (map address int) int).params.storage
+                    PAIR;       # pair address (big_map address (pair (map address int) int)).params.storage
+                  }; # pair (pair address (big_map address (pair (map address int) int))) bool.pair address (big_map address (pair (map address int) int)).params.storage
+                CDR;        # bool.pair address (big_map address (pair (map address int) int)).params.storage
+                SWAP;       # pair address (big_map address (pair (map address int) int)).bool.params.storage
+                PAIR;       # pair (pair address (big_map address (pair (map address int) int))) bool.params.storage
+              }; # storage.pair (pair address (big_map address (pair (map address int) int))) bool.params.storage
+            CDR;        # int.pair (pair address (big_map address (pair (map address int) int))) bool.params.storage
+            SWAP;       # pair (pair address (big_map address (pair (map address int) int))) bool.int.params.storage
+            PAIR;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.storage
+            DUG 2;      # params.storage.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            SWAP;       # storage.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DROP;       # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+          }
+          {}; # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        # sp.verify(self.data.balances[params.fromAddr].balance >= params.amount) # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # params.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CAAR;       # int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DIG 2;      # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.params
+        DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.params
+        DUG 3;      # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CAADR;      # big_map address (pair (map address int) int).int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DIG 2;      # params.big_map address (pair (map address int) int).int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # params.params.big_map address (pair (map address int) int).int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUG 3;      # params.big_map address (pair (map address int) int).int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CADR;       # address.big_map address (pair (map address int) int).int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        GET;        # option (pair (map address int) int).int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        IF_SOME
+          {}
+          {
+            PUSH unit Unit; # unit.int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            FAILWITH;   # FAILED
+          }; # pair (map address int) int.int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CDR;        # int.int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        COMPARE;    # int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        GE;         # bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        IF
+          {}
+          {
+            PUSH string "WrongCondition: self.data.balances[params.fromAddr].balance >= params.amount"; # string.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            FAILWITH;   # FAILED
+          }; # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        # self.data.balances[params.fromAddr].balance -= params.amount # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        SWAP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params
+        DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params
+        DUG 2;      # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CAADR;      # big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DIG 3;      # params.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # params.params.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUG 4;      # params.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CADR;       # address.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # address.address.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUG 2;      # address.big_map address (pair (map address int) int).address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        GET;        # option (pair (map address int) int).address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        IF_SOME
+          {}
+          {
+            PUSH unit Unit; # unit.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            FAILWITH;   # FAILED
+          }; # pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DIG 4;      # params.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # params.params.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUG 5;      # params.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CAAR;       # int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DIG 4;      # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.pair (map address int) int.address.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.pair (map address int) int.address.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUG 5;      # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CAADR;      # big_map address (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DIG 6;      # params.big_map address (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # params.params.big_map address (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUG 7;      # params.big_map address (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CADR;       # address.big_map address (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        GET;        # option (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        IF_SOME
+          {}
+          {
+            PUSH unit Unit; # unit.int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            FAILWITH;   # FAILED
+          }; # pair (map address int) int.int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CDR;        # int.int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        SUB;        # int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        SWAP;       # pair (map address int) int.int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CAR;        # map address int.int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        PAIR;       # pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        SOME;       # option (pair (map address int) int).address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        SWAP;       # address.option (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        UPDATE;     # big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        SWAP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DIP
+          {
+            CAR;        # pair (pair address (big_map address (pair (map address int) int))) bool.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUP;        # pair (pair address (big_map address (pair (map address int) int))) bool.pair (pair address (big_map address (pair (map address int) int))) bool.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DIP
+              {
+                CAAR;       # address.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                PAIR;       # pair address (big_map address (pair (map address int) int)).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+              }; # pair (pair address (big_map address (pair (map address int) int))) bool.pair address (big_map address (pair (map address int) int)).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            CDR;        # bool.pair address (big_map address (pair (map address int) int)).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            SWAP;       # pair address (big_map address (pair (map address int) int)).bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            PAIR;       # pair (pair address (big_map address (pair (map address int) int))) bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+          }; # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair address (big_map address (pair (map address int) int))) bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CDR;        # int.pair (pair address (big_map address (pair (map address int) int))) bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        SWAP;       # pair (pair address (big_map address (pair (map address int) int))) bool.int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        PAIR;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUG 2;      # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        SWAP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DROP;       # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        # self.data.balances[params.toAddr].balance += params.amount # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        SWAP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params
+        DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params
+        DUG 2;      # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CAADR;      # big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DIG 3;      # params.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # params.params.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUG 4;      # params.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CDR;        # address.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # address.address.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUG 2;      # address.big_map address (pair (map address int) int).address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        GET;        # option (pair (map address int) int).address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        IF_SOME
+          {}
+          {
+            PUSH unit Unit; # unit.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            FAILWITH;   # FAILED
+          }; # pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DIG 4;      # params.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # params.params.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUG 5;      # params.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CAAR;       # int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DIG 4;      # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.pair (map address int) int.address.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.pair (map address int) int.address.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUG 5;      # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CAADR;      # big_map address (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DIG 6;      # params.big_map address (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # params.params.big_map address (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUG 7;      # params.big_map address (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CDR;        # address.big_map address (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        GET;        # option (pair (map address int) int).int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        IF_SOME
+          {}
+          {
+            PUSH unit Unit; # unit.int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            FAILWITH;   # FAILED
+          }; # pair (map address int) int.int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CDR;        # int.int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        ADD;        # int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        SWAP;       # pair (map address int) int.int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CAR;        # map address int.int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        PAIR;       # pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        SOME;       # option (pair (map address int) int).address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        SWAP;       # address.option (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        UPDATE;     # big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        SWAP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DIP
+          {
+            CAR;        # pair (pair address (big_map address (pair (map address int) int))) bool.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUP;        # pair (pair address (big_map address (pair (map address int) int))) bool.pair (pair address (big_map address (pair (map address int) int))) bool.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DIP
+              {
+                CAAR;       # address.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                PAIR;       # pair address (big_map address (pair (map address int) int)).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+              }; # pair (pair address (big_map address (pair (map address int) int))) bool.pair address (big_map address (pair (map address int) int)).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            CDR;        # bool.pair address (big_map address (pair (map address int) int)).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            SWAP;       # pair address (big_map address (pair (map address int) int)).bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            PAIR;       # pair (pair address (big_map address (pair (map address int) int))) bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+          }; # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair address (big_map address (pair (map address int) int))) bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CDR;        # int.pair (pair address (big_map address (pair (map address int) int))) bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        SWAP;       # pair (pair address (big_map address (pair (map address int) int))) bool.int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        PAIR;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUG 2;      # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        SWAP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DROP;       # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        # If (params.fromAddr != sp.sender) & (sp.sender != self.data.administrator)... # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DUP;        # params.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        CADR;       # address.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        SENDER;     # address.address.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        COMPARE;    # int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        NEQ;        # bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        IF
+          {
+            SWAP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params
+            DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params
+            DUG 2;      # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            CAAAR;      # address.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            SENDER;     # address.address.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            COMPARE;    # int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            NEQ;        # bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+          }
+          {
+            PUSH bool False; # bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+          }; # bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        IF
+          {
+            # self.data.balances[params.fromAddr].approvals[params.toAddr] -= params.amount # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            SWAP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params
+            DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params
+            DUG 2;      # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            CAADR;      # big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUP;        # big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DIG 3;      # params.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUP;        # params.params.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUG 4;      # params.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            CADR;       # address.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUP;        # address.address.big_map address (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUG 2;      # address.big_map address (pair (map address int) int).address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            GET;        # option (pair (map address int) int).address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            IF_SOME
+              {}
+              {
+                PUSH unit Unit; # unit.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                FAILWITH;   # FAILED
+              }; # pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUP;        # pair (map address int) int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            CAR;        # map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DIG 5;      # params.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUP;        # params.params.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUG 6;      # params.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            CAAR;       # int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DIG 5;      # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUG 6;      # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            CAADR;      # big_map address (pair (map address int) int).int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DIG 7;      # params.big_map address (pair (map address int) int).int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUP;        # params.params.big_map address (pair (map address int) int).int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUG 8;      # params.big_map address (pair (map address int) int).int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            CADR;       # address.big_map address (pair (map address int) int).int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            GET;        # option (pair (map address int) int).int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            IF_SOME
+              {}
+              {
+                PUSH unit Unit; # unit.int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                FAILWITH;   # FAILED
+              }; # pair (map address int) int.int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            CAR;        # map address int.int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DIG 7;      # params.map address int.int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUP;        # params.params.map address int.int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUG 8;      # params.map address int.int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            CDR;        # address.map address int.int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            GET;        # option int.int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            IF_SOME
+              {}
+              {
+                PUSH unit Unit; # unit.int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                FAILWITH;   # FAILED
+              }; # int.int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            SUB;        # int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            SOME;       # option int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DIG 6;      # params.option int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUP;        # params.params.option int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUG 7;      # params.option int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            CDR;        # address.option int.map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            UPDATE;     # map address int.pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            SWAP;       # pair (map address int) int.map address int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            CDR;        # int.map address int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            SWAP;       # map address int.int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            PAIR;       # pair (map address int) int.address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            SOME;       # option (pair (map address int) int).address.big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            SWAP;       # address.option (pair (map address int) int).big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            UPDATE;     # big_map address (pair (map address int) int).pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            SWAP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUP;        # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DIP
+              {
+                CAR;        # pair (pair address (big_map address (pair (map address int) int))) bool.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                DUP;        # pair (pair address (big_map address (pair (map address int) int))) bool.pair (pair address (big_map address (pair (map address int) int))) bool.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                DIP
+                  {
+                    CAAR;       # address.big_map address (pair (map address int) int).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                    PAIR;       # pair address (big_map address (pair (map address int) int)).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                  }; # pair (pair address (big_map address (pair (map address int) int))) bool.pair address (big_map address (pair (map address int) int)).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                CDR;        # bool.pair address (big_map address (pair (map address int) int)).params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                SWAP;       # pair address (big_map address (pair (map address int) int)).bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+                PAIR;       # pair (pair address (big_map address (pair (map address int) int))) bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+              }; # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair address (big_map address (pair (map address int) int))) bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            CDR;        # int.pair (pair address (big_map address (pair (map address int) int))) bool.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            SWAP;       # pair (pair address (big_map address (pair (map address int) int))) bool.int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            PAIR;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DUG 2;      # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            SWAP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int.params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+            DROP;       # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+          }
+          {}; # params.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+        DROP;       # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+      }; # pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+    NIL operation; # list operation.pair (pair (pair address (big_map address (pair (map address int) int))) bool) int
+    PAIR;       # pair (list operation) (pair (pair (pair address (big_map address (pair (map address int) int))) bool) int)
+  } # pair (list operation) (pair (pair (pair address (big_map address (pair (map address int) int))) bool) int);
